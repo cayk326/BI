@@ -21,10 +21,10 @@ class Util():
     def ConstractDataFrame(self,all_files):
         data_length_list = np.arange(all_files.__len__())  # To store length of each data frame
         for i in range(all_files.__len__()):
-            data_length_list[i] = pd.read_csv(all_files[i]).__len__()
-        each_file = (pd.read_csv(f) for f in all_files)  # read all csv as data frame
+            data_length_list[i] = pd.read_csv(all_files[i],header=header_pos).__len__()
+        each_file = (pd.read_csv(f, header=header_pos) for f in all_files)  # read all csv as data frame
         dataframe = pd.concat(each_file, ignore_index=True)  # connect all data frame
-        return dataframe
+        return dataframe,data_length_list
 
     def calctime(self,func):
         start = time()
@@ -87,6 +87,83 @@ class Plotting():
         #layout = row(column(p1, p2), p3)
         show(tabs)
 
+    def plotDf(self,df,lengthlist):
+        reset_output()
+        output_file("result.html")
+        TOOLTIPS = [
+            ("index", "$index"),
+            ("(x,y)"
+            , "($x, $y)"),
+        ]
+
+        p1 = figure(
+            title="Time - SWA",
+            width=600,
+            height=200,
+            x_axis_label='Time',
+            y_axis_label='SWA',
+            tooltips=TOOLTIPS
+        )
+
+        p2 = figure(
+            title="Time - Throttle",
+            width=600,
+            height=200,
+            x_range=p1.x_range,
+            x_axis_label='Time',
+            y_axis_label='Throttle',
+            tooltips=TOOLTIPS
+        )
+
+        p3 = figure(
+            title="Time - Brake",
+            width=600,
+            height=200,
+            x_range=p2.x_range,
+            x_axis_label='Time',
+            y_axis_label='Brake',
+            tooltips=TOOLTIPS
+        )
+
+        p4 = figure(
+            title="Time - Speed",
+            width=600,
+            height=200,
+            x_range=p3.x_range,
+            x_axis_label='Time',
+            y_axis_label='Speed',
+            tooltips=TOOLTIPS
+        )
+
+
+        currntloc = 0
+        for i in range(lengthlist.__len__()):
+            if i == 0:
+                p1.line(df.iloc[0:lengthlist[i], 0], df.iloc[0:lengthlist[i], 1], legend="data No"+str(i),color=color[i])
+                p2.line(df.iloc[0:lengthlist[i], 0], df.iloc[0:lengthlist[i], 2], legend="data No"+str(i),color=color[i])
+                p3.line(df.iloc[0:lengthlist[i], 0], df.iloc[0:lengthlist[i], 3], legend="data No"+str(i),color=color[i])
+                p4.line(df.iloc[0:lengthlist[i], 0], df.iloc[0:lengthlist[i], 4], legend="data No" + str(i),color=color[i])
+                currentloc = lengthlist[i]
+            else:
+                p1.line(df.iloc[currentloc:sum(list(lengthlist)[0:i+1]), 0], df.iloc[currentloc:sum(list(lengthlist)[0:i+1]), 1], legend="data No"+str(i),color=color[i])
+                p2.line(df.iloc[currentloc:sum(list(lengthlist)[0:i + 1]), 0],df.iloc[currentloc:sum(list(lengthlist)[0:i + 1]), 2], legend="data No" + str(i),color=color[i])
+                p3.line(df.iloc[currentloc:sum(list(lengthlist)[0:i + 1]), 0],df.iloc[currentloc:sum(list(lengthlist)[0:i + 1]), 3], legend="data No" + str(i),color=color[i])
+                p4.line(df.iloc[currentloc:sum(list(lengthlist)[0:i + 1]), 0],df.iloc[currentloc:sum(list(lengthlist)[0:i + 1]), 4], legend="data No" + str(i),color=color[i])
+                currentloc = currentloc+lengthlist[i]
+
+
+        #first = Panel(child=gridplot([[p1, p2, p3,p4], [p3, None]]), title='first')
+        #second = Panel(child=gridplot([[p1, p2, p3], [p3, None]]), title='second')
+        #tabs = Tabs(tabs=[first, second])
+        layout = gridplot([[p1,p2],[p3,p4]])
+        #layout = row(column(p1, p2), p3)
+        show(layout)
+
+
+        return
+
+
+
 
 class Dictionary():
     from collections import defaultdict
@@ -104,9 +181,9 @@ class Dictionary():
 if __name__ == '__main__':
     print('start')
     'Settings information'
-    data_directory_path = r''  # Directory which is stored data
+    data_directory_path = r'C:\Users\yuta0\PycharmProjects\AI\BITool\data'  # Directory which is stored data
     header_pos = 2
-
+    color = ['red','yellow', 'green', 'blue', 'black']
 
     util_ins = Util()
     all_files_path = util_ins.AllFileList(data_directory_path)
@@ -120,7 +197,9 @@ if __name__ == '__main__':
         df = pd.read_csv(all_files_path[i], header=header_pos)
         df_shape = df.shape
         cols = list(df.columns.values)
-        plot_ins.plot()
+        #plot_ins.plot()
 
 
-
+    df2,data_length_list = util_ins.ConstractDataFrame(all_files_path)
+    plot_ins.plotDf(df2,data_length_list)
+    print('')
