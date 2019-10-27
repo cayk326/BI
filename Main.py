@@ -181,9 +181,9 @@ class Dictionary():
 if __name__ == '__main__':
     print('start')
     'Settings information'
-    data_directory_path = r'C:\Users\yuta0\PycharmProjects\AI\BITool\data'  # Directory which is stored data
+    data_directory_path = r''  # Directory which is stored data
     header_pos = 2
-    color = ['red','yellow', 'green', 'blue', 'black']
+    color = ['red','blue', 'green', 'yellow', 'black']
 
     util_ins = Util()
     all_files_path = util_ins.AllFileList(data_directory_path)
